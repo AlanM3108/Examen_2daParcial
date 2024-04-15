@@ -1,0 +1,169 @@
+﻿@page "/Examen"
+@using TAREA.Data
+@rendermode InteractiveServer
+<h3>ESTUDIANTES</h3>
+
+<EditForm Model="_persona" FormName="frmPersona" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+       @*  @<ValidationSummary />@ *@
+
+    <div class="col">
+        <div class="col">
+            <div class="form-group">
+            <label class="form-label col-2">Inventario</label>
+            <InputText class="form-control col-10" @bind-Value="@_persona.Inventario"></InputText> <br>
+            <ValidationMessage For="()=>_persona.Inventario" />
+            </div>
+        </div>
+        <br />
+        <div class="col">
+            <div class="form-group">
+            <label class="form-label col-2">Nombre</label>
+            <InputText class="form-control col-10" @bind-Value="@_persona.Nombre"></InputText> <br>
+            <ValidationMessage For="()=>_persona.Nombre"></ValidationMessage>
+        </div>
+        </div>
+        <br />
+        <div class="col">
+
+            <label class="form-label col-2">Departamento</label><br />
+            <InputRadioGroup @bind-Value="_persona.Departamento">
+                <InputRadio Value="@("Frutas")"></InputRadio>Frutas
+                <InputRadio Value="@("Verduras")"></InputRadio>Verduras
+                <InputRadio Value="@("Lácteos")"></InputRadio>Lácteos
+            </InputRadioGroup>
+<ValidationMessage For="()=>_persona.Departamento"></ValidationMessage>
+
+        </div>
+
+
+
+
+    </div>
+
+    <button class="btn btn-primary my-3" type="submit">Guardar</button>
+    
+
+</EditForm>
+<button class="btn btn-dark my-3" @onclick="Existencia" @onclick:preventDefault>Existencias</button>
+<button class="btn btn-grey my-3" @onclick="Listado" @onclick:preventDefault>Listado</button>
+
+@if(Existencias == true)
+{
+    
+
+
+    @if(Personas.Count() > 0)
+    {
+
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Inventario</th>
+                <th>Nombre</th>
+                <th>Departamento</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+                @foreach(Persona elemento in Personas)
+
+                {
+                    <tr>
+                    <td>@elemento.Inventario</td>
+                    <td>@elemento.Nombre</td>
+                    <td>@elemento.Departamento</td>
+                        <td>
+                        <button @onclick="()=>Eliminar(elemento)">Borrar</button>
+                        <button @onclick="()=>Editar(elemento)">Editar</button>
+                        </td>
+                    </tr>
+
+                }
+            </tbody>
+    </table>
+}}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Frutas</th>
+                <th>Verduras</th>
+                <th>Lacteo</th>
+
+            </tr>
+        </thead>
+        <tbody>
+           <tr>
+               <td>@Personas.Count(y => y.Departamento == "Frutas")</td>
+                <td>@Personas.Count(y => y.Departamento == "Verduras")</td>
+                <td>@Personas.Count(y => y.Departamento == "Lácteos")</td>
+           </tr>
+        </tbody>
+    </table>
+}
+
+
+<div class="alert alert-danger" role="alert" style="display: @(!string.IsNullOrEmpty(mensajeError) ? "block" : "none")">
+    @mensajeError
+</div>
+
+@code {
+    private bool Existencias = true;
+    private string? mensajeError = "";
+    private string? SelectedDepartamento = "";
+    private List<Persona> Personas = new List<Persona>();
+    private Persona _persona = new Persona();
+    private string? Fruta = "";
+    private string? Verd = "";
+    private string? Lact = "";
+    private void Listado()
+    {
+        Existencias = true;
+    }
+    private void Guardar()
+    {
+
+        if (_persona.Nombre!.Length > 0)
+        {
+            if (!Personas.Any(p => p.Inventario == _persona.Inventario))
+            {
+                Personas.Add(_persona);
+                _persona = new Persona();
+                mensajeError = "";
+            }else
+            {
+                mensajeError = "El valor del inventario ya existe";
+            }
+
+        }
+
+    }
+    private void Existencia()
+    {
+        Existencias = false;
+
+
+    }
+    private void Limpiar()
+    {
+        Personas.Clear();
+    }
+    private void Filtrar()
+    {
+        Personas = Personas.Where(r => r.Nombre.Contains(_persona.Nombre)).ToList();
+    }
+    private void Eliminar(Persona persona)
+    {
+        Personas.Remove(persona);
+    }
+    private bool _editMode = false;
+
+    private void Editar(Persona persona)
+    {
+        
+    }
+
+}
